@@ -8,6 +8,15 @@ import sys
 
 from matplotlib.patches import Circle, Rectangle
 
+
+@dataclass
+class Ind:
+	x: float
+	y: float
+	puissance: float
+	theta1: float
+	theta2: float
+
 def evaluateLamps(lamps, radius, square, visualize=False) :
 	
 	globalFitness = 0.0

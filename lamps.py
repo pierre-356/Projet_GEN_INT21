@@ -5,6 +5,7 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+from random import Random
 
 from matplotlib.patches import Circle, Rectangle
 
@@ -16,6 +17,18 @@ class Ind:
 	puissance: float
 	theta1: float
 	theta2: float
+
+# parametre de l'algo genetique
+mu = 0.3
+lbda = 0.7
+Pc = 0.3
+Pm = 1-Pc
+pas_arret = 4 # difference entre 2 iterations pour valider la convergence
+
+# parametres de l'environnement
+# sides of the square, [width, height]
+square = [1, 1]
+
 
 def evaluateLamps(lamps, radius, square, visualize=False) :
 	
@@ -71,9 +84,51 @@ def evaluateLamps(lamps, radius, square, visualize=False) :
 	
 	return globalFitness
 
+def mutation1(lamp) :
+	"""
+	ne peut pas agire sur la puissance
+
+	fais muter chaque attributs les un apres les autres
+	"""
+	# les coordonnees
+	x = min (square[0], max (0, ))
+
+def mutation1(lamp) :
+	"""
+	ne peut pas agire sur la puissance
+
+	choisis un attribut a muter
+	"""
+
+def appliquerEvolution(lamps) :
+	fit = evaluateLamps(lamps)
+	# premiere iteration
+	"""
+	mutation
+	croisement
+	selection
+	"""
+	tmp = evaluateLamps(lamps)
+	delta = math.abs(tmp - fit)
+	fit = tmp
+	while(delta > pas_arret) :
+		"""
+		mutation
+		croisement
+		selection
+		"""
+		tmp = evaluateLamps(lamps)
+		delta = math.abs(tmp - fit)
+		fit = tmp
+	return
+
+
 
 # this main is just here to try the function, and give you an idea of how it works
 def main() :
+
+	generator = Random()
+	generator.seed(42)
 	
 	# sides of the square, [width, height]
 	square = [1, 1]

@@ -99,15 +99,17 @@ def main() :
 	# sides of the square, [width, height]
 	square = [1, 1]
 	
+	pop = []
+	for i in range(4):
+		lamps = []
+		for j in range(3):
+			theta2 = generator.uniform(0,360)
+			lamps.append(Ind(x=generator.uniform(0,1), y=generator.uniform(0,1), puissance=generator.uniform(0,1), theta1=generator.uniform(0,1)*theta2, theta2=theta2))
+		pop.append(lamps)
+
+	lamps = appliquerEvolution(pop, generator)
 	
-	# Création de 4 lampes dans le carré (0,1)
-	lamps = [
-    Ind(x=0.2, y=0.2, puissance=0.2, theta1=90.0, theta2=270.0),  # Lampe en bas à gauche
-    Ind(x=0.8, y=0.2, puissance=0.3, theta1=0.0, theta2=180.0),  # Lampe en bas à droite
-	]
-	
-	# calling the function; the argument "visualize=True" makes it plot the current situation
-	fitness = evaluateLamps(lamps, square, visualize=True)
+	print(lamps)
 	
 	return
 

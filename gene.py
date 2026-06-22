@@ -1,11 +1,20 @@
 from lamps import *
+from lamps import evaluateLamps
 from tools import *
 import math
+from dataclasses import dataclass
 
+@dataclass
+class Ind:
+	x: float
+	y: float
+	puissance: float
+	theta1: float
+	theta2: float
 
 # parametre de l'algo genetique
-mu = 0.3
-lbda = 0.7
+mu = 10
+lbda = 3
 Pc = 0.3
 Pm = 1-Pc
 nb_it = 30
@@ -16,6 +25,10 @@ delta_puiss = 0.2
 delta_theta = 0.2
 nb_mut = 1
 
+
+# parametres de l'environnement
+# sides of the square, [width, height]
+square = [1, 1]
 
 
 def mutation1_uni(lamp, gener) :
@@ -41,7 +54,7 @@ def mutation2_uni(lamp, gener) :
 	choisis un attribut a muter
 	"""
 	enfant = Ind(x=lamp.x, y=lamp.y, puissance=lamp.puissance, theta1=lamp.theta1, theta2=lamp.theta2)
-	attribut = gener.randint(0, 3)
+	attribut = gener.randint(0, 2)
 	match attribut :
 		case 0 :
 			enfant.x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
@@ -60,7 +73,7 @@ def mutation1(lamps, gener) :
 	"""
 	nouveau = lamps.copy()
 	for i in range (nb_mut) :
-		choisi = gener.randint(0, len(nouveau))
+		choisi = gener.randint(0, len(nouveau)-1)
 		nouveau[choisi] = mutation1_uni(lamps[choisi], gener)
 	return nouveau
 
@@ -71,7 +84,7 @@ def mutation2(lamps, gener) :
 	"""
 	nouveau = lamps.copy()
 	for i in range (nb_mut) :
-		choisi = gener.randint(0, len(nouveau))
+		choisi = gener.randint(0, len(nouveau)-1)
 		nouveau[choisi] = mutation2_uni(lamps[choisi], gener)
 	return nouveau
 
@@ -122,21 +135,20 @@ def croisement2(lamps1, lamps2, gener) :
 	return nouveau
 
 def appliquerEvolution(pop, gener) :
-    fit = evaluateLamps(pop)
     # premiere iteration
 
     for i in range(nb_it) :
         # les mutations
         mut = []
         for i in range(int(Pm*lbda)) :
-            choisi = gener.randint(0, len(pop))
+            choisi = gener.randint(0, len(pop)-1)
             mut.append(mutation1(pop[choisi], gener))
 
         # croisements
         crois = []
         for i in range(lbda-int(Pm*lbda)) :
-            parent1 = gener.randint(0, len(pop))
-            parent2 = gener.randint(0, len(pop))
+            parent1 = gener.randint(0, len(pop)-1)
+            parent2 = gener.randint(0, len(pop)-1)
             while (parent1 == parent2) :
                 parent2 = gener.randint(0, len(pop))
                 crois.append(croisement1(pop[parent1], pop[parent2], gener))

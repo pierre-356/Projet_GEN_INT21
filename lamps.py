@@ -2,7 +2,6 @@
 # by Thomas Chabin, Evelyne Lutton, Alberto Tonda, 2018 <alberto.tonda@gmail.com>
 
 from tools import *
-from gene import *
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,11 +21,153 @@ class Ind:
 	theta1: float
 	theta2: float
 
+# parametre de l'algo genetique
+mu = 10
+lbda = 3
+Pc = 0.3
+Pm = 1-Pc
+nb_it = 30
+
+# parametre de l'aleatoire
+delta_xy = 0.2
+delta_puiss = 0.2
+delta_theta = 0.2
+nb_mut = 1
 
 
 # parametres de l'environnement
 # sides of the square, [width, height]
 square = [1, 1]
+
+def mutation1_uni(lamp, gener) :
+	"""
+	fais muter chaque attributs les un apres les autres
+	"""
+	# les coordonnees
+	x_e = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+	y_e = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+	
+	# puissance
+	p = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+
+	# theta
+	theta1_e = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+	theta2_e = min (360, max (theta1_e, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+	
+	enfant = Ind(x=x_e, y=y_e, puissance=p, theta1=theta1_e, theta2=theta2_e)
+	return enfant
+
+def mutation2_uni(lamp, gener) :
+	"""
+	choisis un attribut a muter
+	"""
+	enfant = Ind(x=lamp.x, y=lamp.y, puissance=lamp.puissance, theta1=lamp.theta1, theta2=lamp.theta2)
+	attribut = gener.randint(0, 2)
+	match attribut :
+		case 0 :
+			enfant.x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+			enfant.y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+		case 1 :
+			enfant.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+		case 2 :
+			enfant.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+			enfant.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+	return enfant
+
+def mutation1(lamps, gener) :
+	"""
+	en fait muter nb_mut
+	renvoie le nouveau tableau de lamp
+	"""
+	nouveau = lamps.copy()
+	for i in range (nb_mut) :
+		choisi = gener.randint(0, len(nouveau)-1)
+		nouveau[choisi] = mutation1_uni(lamps[choisi], gener)
+	return nouveau
+
+def mutation2(lamps, gener) :
+	"""
+	en fait muter nb_mut
+	renvoie le nouveau tableau de lamp
+	"""
+	nouveau = lamps.copy()
+	for i in range (nb_mut) :
+		choisi = gener.randint(0, len(nouveau)-1)
+		nouveau[choisi] = mutation2_uni(lamps[choisi], gener)
+	return nouveau
+
+def croisement1_uni (l1, l2, gener) :
+	"""
+	utilise la meme ponderation de moyenne pour tous les attributs
+	"""
+	poids = gener.uniform(0,1)
+	x_e = poids*l1.x + (1-poids)*l2.x
+	y_e = poids*l1.y + (1-poids)*l2.y
+	p_e = poids*l1.puissance + (1-poids)*l2.puissance
+	t1_e = poids*l1.theta1 + (1-poids)*l2.theta1
+	t2_e = poids*l1.theta2 + (1-poids)*l2.theta2
+	enfant = Ind(x=x_e, y=y_e, puissance=p_e, theta1=t1_e, theta2=t2_e)
+	return enfant
+
+def croisement2_uni (l1, l2, gener) :
+	"""
+	utilise une ponderation de moyenne differente pour chaques attributs
+	"""
+	poids = gener.uniform()
+	x_e = poids*l1.x + (1-poids)*l2.x
+	y_e = poids*l1.y + (1-poids)*l2.y
+	poids = gener.uniform()
+	p_e = poids*l1.puissance + (1-poids)*l2.puissance
+	poids = gener.uniform()
+	t1_e = poids*l1.theta1 + (1-poids)*l2.theta1
+	t2_e = poids*l1.theta2 + (1-poids)*l2.theta2
+	enfant = Ind(x=x_e, y=y_e, puissance=p_e, theta1=t1_e, theta2=t2_e)
+	return enfant
+
+def croisement1(lamps1, lamps2, gener) :
+	"""
+	prend a chaque fois le croisement entre 2 lampes
+	"""
+	nouveau = []
+	for i in range(len(lamps1)) :
+		nouveau.append(croisement1_uni(lamps1[i],lamps2[i], gener)) 
+	return nouveau
+
+def croisement2(lamps1, lamps2, gener) :
+	"""&
+	prend a chaque fois le croisement entre 2 lampes
+	"""
+	nouveau = []
+	for i in range(len(lamps1)) :
+		nouveau.append(croisement2_uni(lamps1[i],lamps2[i])) 
+	return nouveau
+
+def appliquerEvolution(pop, gener) :
+    # premiere iteration
+
+    for i in range(nb_it) :
+        # les mutations
+        mut = []
+        for i in range(int(Pm*lbda)) :
+            choisi = gener.randint(0, len(pop)-1)
+            mut.append(mutation1(pop[choisi], gener))
+
+        # croisements
+        crois = []
+        for i in range(lbda-int(Pm*lbda)) :
+            parent1 = gener.randint(0, len(pop)-1)
+            parent2 = gener.randint(0, len(pop)-1)
+            while (parent1 == parent2) :
+                parent2 = gener.randint(0, len(pop)-1)
+                crois.append(croisement1(pop[parent1], pop[parent2], gener))
+        pop = pop + mut + crois 
+    
+        # selection
+        pop = sorted(pop, key = lambda x : evaluateLamps(x, square)) # trie
+        pop = pop[0:lbda] # garde les meilleurs
+        
+    return pop[0] # retourne le meilleur
+
 
 
 def evaluateLamps(lstLamps, square, visualize=False) :
@@ -38,8 +179,6 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 
 	# compute coverage of the square, going step by step
 	somme_taux_eclairement = 0.0
-
-	print("mamacita")
 	
 	for x in np.arange(0.0, square[0], discretizationStep) :
 		for y in np.arange(0.0, square[1], discretizationStep) :
@@ -99,7 +238,7 @@ def main() :
 
 	
 	pop = []
-	for i in range(4):
+	for i in range(mu):
 		lamps = []
 		for j in range(3):
 			theta2 = generator.uniform(0,360)

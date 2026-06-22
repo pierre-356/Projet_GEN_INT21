@@ -1,3 +1,21 @@
+from lamps import *
+import math
+
+
+# parametre de l'algo genetique
+mu = 0.3
+lbda = 0.7
+Pc = 0.3
+Pm = 1-Pc
+pas_arret = 4 # difference entre 2 iterations pour valider la convergence
+
+# parametre de l'aleatoire
+delta_xy = 0.2
+delta_puiss = 0.2
+delta_theta = 0.2
+
+
+
 def mutation1(lamp, gener) :
 	"""
 	fais muter chaque attributs les un apres les autres
@@ -30,6 +48,9 @@ def mutation1(lamp, gener) :
 		case 2 :
 			lamp.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
 			lamp.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+
+def croisement (l1, l2) :
+	
 
 def appliquerEvolution(lamps) :
 	fit = evaluateLamps(lamps)

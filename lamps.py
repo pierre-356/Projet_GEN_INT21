@@ -96,8 +96,7 @@ def main() :
 	generator = Random()
 	generator.seed(time.time())
 	
-	# sides of the square, [width, height]
-	square = [1, 1]
+
 	
 	pop = []
 	for i in range(4):

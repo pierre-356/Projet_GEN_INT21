@@ -1,4 +1,5 @@
 from lamps import *
+from tools import *
 import math
 
 
@@ -7,69 +8,142 @@ mu = 0.3
 lbda = 0.7
 Pc = 0.3
 Pm = 1-Pc
-pas_arret = 4 # difference entre 2 iterations pour valider la convergence
+nb_it = 30
 
 # parametre de l'aleatoire
 delta_xy = 0.2
 delta_puiss = 0.2
 delta_theta = 0.2
+nb_mut = 1
 
 
 
-def mutation1(lamp, gener) :
+def mutation1_uni(lamp, gener) :
 	"""
 	fais muter chaque attributs les un apres les autres
 	"""
 	# les coordonnees
-	x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
-	lamp.x = x
-	y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
-	lamp.y = y
-
+	x_e = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+	y_e = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+	
 	# puissance
-	lamp.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+	p = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
 
 	# theta
-	lamp.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
-	lamp.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+	theta1_e = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+	theta2_e = min (360, max (theta1_e, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+	
+	enfant = Ind(x=x_e, y=y_e, puissance=p, theta1=theta1_e, theta2=theta2_e)
+	return enfant
 
-
-def mutation1(lamp, gener) :
+def mutation2_uni(lamp, gener) :
 	"""
 	choisis un attribut a muter
 	"""
+	enfant = Ind(x=lamp.x, y=lamp.y, puissance=lamp.puissance, theta1=lamp.theta1, theta2=lamp.theta2)
 	attribut = gener.randint(0, 3)
 	match attribut :
 		case 0 :
-			lamp.x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
-			lamp.y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+			enfant.x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+			enfant.y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
 		case 1 :
-			lamp.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+			enfant.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
 		case 2 :
-			lamp.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
-			lamp.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+			enfant.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+			enfant.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+	return enfant
 
-def croisement (l1, l2) :
-	
+def mutation1(lamps, gener) :
+	"""
+	en fait muter nb_mut
+	renvoie le nouveau tableau de lamp
+	"""
+	nouveau = lamps.copy()
+	for i in range (nb_mut) :
+		choisi = gener.randint(0, len(nouveau))
+		nouveau[choisi] = mutation1_uni(lamps[choisi], gener)
+	return nouveau
 
-def appliquerEvolution(lamps) :
-	fit = evaluateLamps(lamps)
-	# premiere iteration
+def mutation2(lamps, gener) :
 	"""
-	mutation
-	croisement
-	selection
+	en fait muter nb_mut
+	renvoie le nouveau tableau de lamp
 	"""
-	tmp = evaluateLamps(lamps)
-	delta = math.abs(tmp - fit)
-	fit = tmp
-	while(delta > pas_arret) :
-		"""
-		mutation
-		croisement
-		selection
-		"""
-		tmp = evaluateLamps(lamps)
-		delta = math.abs(tmp - fit)
-		fit = tmp
-	return
+	nouveau = lamps.copy()
+	for i in range (nb_mut) :
+		choisi = gener.randint(0, len(nouveau))
+		nouveau[choisi] = mutation2_uni(lamps[choisi], gener)
+	return nouveau
+
+def croisement1_uni (l1, l2, gener) :
+	"""
+	utilise la meme ponderation de moyenne pour tous les attributs
+	"""
+	poids = gener.uniform()
+	x_e = poids*l1.x + (1-poids)*l2.x
+	y_e = poids*l1.y + (1-poids)*l2.y
+	p_e = poids*l1.puissance + (1-poids)*l2.puissance
+	t1_e = poids*l1.theta1 + (1-poids)*l2.theta1
+	t2_e = poids*l1.theta2 + (1-poids)*l2.theta2
+	enfant = Ind(x=x_e, y=y_e, puissance=p_e, theta1=t1_e, theta2=t2_e)
+	return enfant
+
+def croisement2_uni (l1, l2, gener) :
+	"""
+	utilise une ponderation de moyenne differente pour chaques attributs
+	"""
+	poids = gener.uniform()
+	x_e = poids*l1.x + (1-poids)*l2.x
+	y_e = poids*l1.y + (1-poids)*l2.y
+	poids = gener.uniform()
+	p_e = poids*l1.puissance + (1-poids)*l2.puissance
+	poids = gener.uniform()
+	t1_e = poids*l1.theta1 + (1-poids)*l2.theta1
+	t2_e = poids*l1.theta2 + (1-poids)*l2.theta2
+	enfant = Ind(x=x_e, y=y_e, puissance=p_e, theta1=t1_e, theta2=t2_e)
+	return enfant
+
+def croisement1(lamps1, lamps2, gener) :
+	"""
+	prend a chaque fois le croisement entre 2 lampes
+	"""
+	nouveau = []
+	for i in range(len(lamps1)) :
+		nouveau.append(croisement1_uni(lamps1[i],lamps2[i])) 
+	return nouveau
+
+def croisement2(lamps1, lamps2, gener) :
+	"""&
+	prend a chaque fois le croisement entre 2 lampes
+	"""
+	nouveau = []
+	for i in range(len(lamps1)) :
+		nouveau.append(croisement2_uni(lamps1[i],lamps2[i])) 
+	return nouveau
+
+def appliquerEvolution(pop, gener) :
+    fit = evaluateLamps(pop)
+    # premiere iteration
+
+    for i in range(nb_it) :
+        # les mutations
+        mut = []
+        for i in range(int(Pm*lbda)) :
+            choisi = gener.randint(0, len(pop))
+            mut.append(mutation1(pop[choisi], gener))
+
+        # croisements
+        crois = []
+        for i in range(lbda-int(Pm*lbda)) :
+            parent1 = gener.randint(0, len(pop))
+            parent2 = gener.randint(0, len(pop))
+            while (parent1 == parent2) :
+                parent2 = gener.randint(0, len(pop))
+                crois.append(croisement1(pop[parent1], pop[parent2], gener))
+        pop = pop + mut + crois 
+    
+        # selection
+        pop = sorted(pop, key = lambda x : evaluateLamps(x, square)) # trie
+        pop = pop[0:lbda] # garde les meilleurs
+        
+    return pop[0] # retourne le meilleur

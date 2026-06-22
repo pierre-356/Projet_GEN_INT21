@@ -1,4 +1,4 @@
-import lamps.py
+from lamps import *
 import math
 
 
@@ -8,8 +8,13 @@ def distance(x1, y1, x2, y2):
     return math.sqrt(d_carre)
 
 
+def scalaire(x1, y1, x2, y2):
+    return (x1*x2+y1*y2)
+
+
+
 # Calcule le taux d'eclairement du point de coordonnées (x,y) par rapport à l'individu : lampe 
-def taux_eclairement(lampe, x, y):
+def taux_eclairement_unaire(lampe, x, y):
     x_lampe = lampe.x
     y_lampe = lampe.y
     puiss = lampe.puissance
@@ -20,7 +25,34 @@ def taux_eclairement(lampe, x, y):
     eclairement_distance = 0
     if(distance_centre < puiss):
         eclairement_distance = (puiss-distance_centre)/puiss
+
+    eclairement_angle = 0
+    if(puiss != 0 and eclairement_distance != 0 and theta2_lampe-theta1_lampe < 359.9):
+        angle_max = (theta1_lampe+theta2_lampe)/2
+        angle_max_rad = math.radians(angle_max)
+        scal = scalaire(x-x_lampe, y-y_lampe, puiss*math.cos(angle_max_rad), puiss*math.sin(angle_max_rad))
+        cos_angle_rad = scal/(puiss*distance_centre)
+        angle_rad = math.acos(cos_angle_rad)
+        angle = math.degrees(angle_rad)
+
+        if(angle > theta1_lampe and angle < theta2_lampe):
+            eclairement_angle = min((2/(theta2_lampe-theta1_lampe))*(angle-theta1_lampe), 2/(theta1_lampe-theta2_lampe)*(angle-theta2_lampe))
     
-    eclairement_angle = 1
-    if(theta2_lampe-theta1_lampe < 359):
-        eclairement_angle = 
+    return eclairement_distance*eclairement_angle
+
+
+#Calcule l'éclairement du point de coordonnées (x, y) pour toutes les lampes de lstLampe
+def calcule_eclairement(lstLampe, x, y):
+    eclairement_total = 0 
+    for i in range(len(lstLampe)):
+        eclairement_total += taux_eclairement_unaire(lstLampe[i], x, y)
+        if(eclairement_total > 1):
+            return 1
+    return eclairement_total
+
+
+def somme_puissance(lstLampe):
+    somme = 0.0
+    for i in range(len(lstLampe)):
+        somme += lstLampe[i].puissance*lstLampe[i].puissance*(lstLampe[i].theta2-lstLampe[i].theta1)/360
+    return somme

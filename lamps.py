@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 from random import Random
+import time
 
 from matplotlib.patches import Circle, Rectangle
 
@@ -24,6 +25,11 @@ lbda = 0.7
 Pc = 0.3
 Pm = 1-Pc
 pas_arret = 4 # difference entre 2 iterations pour valider la convergence
+
+# parametre de l'aleatoire
+delta_xy = 0.2
+delta_puiss = 0.2
+delta_theta = 0.2
 
 # parametres de l'environnement
 # sides of the square, [width, height]
@@ -84,21 +90,38 @@ def evaluateLamps(lamps, radius, square, visualize=False) :
 	
 	return globalFitness
 
-def mutation1(lamp) :
+def mutation1(lamp, gener) :
 	"""
-	ne peut pas agire sur la puissance
-
 	fais muter chaque attributs les un apres les autres
 	"""
 	# les coordonnees
-	x = min (square[0], max (0, ))
+	x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+	lamp.x = x
+	y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+	lamp.y = y
 
-def mutation1(lamp) :
+	# puissance
+	lamp.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+
+	# theta
+	lamp.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+	lamp.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
+
+
+def mutation1(lamp, gener) :
 	"""
-	ne peut pas agire sur la puissance
-
 	choisis un attribut a muter
 	"""
+	attribut = gener.randint(0, 3)
+	match attribut :
+		case 0 :
+			lamp.x = min (square[0], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.x))
+			lamp.y = min (square[1], max (0, gener.uniform(1-delta_xy, 1+delta_xy)*lamp.y))
+		case 1 :
+			lamp.puissance = max (0, gener.uniform(1-delta_puiss, 1+delta_puiss)*lamp.puissance)
+		case 2 :
+			lamp.theta1 = min (360, max (0, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta1))
+			lamp.theta2 = min (360, max (lamp.theta1, gener.uniform(1-delta_theta, 1+delta_theta)*lamp.theta2))
 
 def appliquerEvolution(lamps) :
 	fit = evaluateLamps(lamps)
@@ -128,7 +151,7 @@ def appliquerEvolution(lamps) :
 def main() :
 
 	generator = Random()
-	generator.seed(42)
+	generator.seed(time.time())
 	
 	# sides of the square, [width, height]
 	square = [1, 1]

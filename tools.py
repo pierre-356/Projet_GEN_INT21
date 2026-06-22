@@ -18,25 +18,24 @@ def taux_eclairement_unaire(lampe, x, y):
     x_lampe = lampe.x
     y_lampe = lampe.y
     puiss = lampe.puissance
-    theta1_lampe = lampe.theta1
-    theta2_lampe = lampe.theta2
+    theta1 = lampe.theta1
+    theta2 = lampe.theta2
     
     distance_centre = distance(x_lampe, y_lampe, x, y)
     eclairement_distance = 0
     if(distance_centre < puiss):
         eclairement_distance = (puiss-distance_centre)/puiss
 
-    eclairement_angle = 0
-    if(puiss != 0 and eclairement_distance != 0 and theta2_lampe-theta1_lampe < 359.9):
-        angle_max = (theta1_lampe+theta2_lampe)/2
-        angle_max_rad = math.radians(angle_max)
-        scal = scalaire(x-x_lampe, y-y_lampe, puiss*math.cos(angle_max_rad), puiss*math.sin(angle_max_rad))
-        cos_angle_rad = scal/(puiss*distance_centre)
-        angle_rad = math.acos(cos_angle_rad)
-        angle = math.degrees(angle_rad)
+    dx = x - x_lampe
+    dy = y - y_lampe
+    angle_rad = math.atan2(dy, dx)  # Angle en radians, entre -pi et pi
+    angle = math.degrees(angle_rad) % 360  # Conversion en degrés, entre 0 et 360
 
-        if(angle > theta1_lampe and angle < theta2_lampe):
-            eclairement_angle = min((2/(theta2_lampe-theta1_lampe))*(angle-theta1_lampe), 2/(theta1_lampe-theta2_lampe)*(angle-theta2_lampe))
+    # Cas normal : theta1 <= theta2 (ex: 30° à 60°)
+    if theta1 <= angle <= theta2:
+        eclairement_angle = 1
+    else:
+        eclairement_angle = 0
     
     return eclairement_distance*eclairement_angle
 

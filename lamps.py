@@ -1,15 +1,16 @@
 # Function to evaluate the "lamp" problem, where we try to place round-shaped lamps to cover a square space
 # by Thomas Chabin, Evelyne Lutton, Alberto Tonda, 2018 <alberto.tonda@gmail.com>
 
-import tools.py
+from tools import *
 import math
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
 from random import Random
+from dataclasses import dataclass
+
 
 from matplotlib.patches import Circle, Rectangle
-
 
 @dataclass
 class Ind:
@@ -60,13 +61,12 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 	
 	# if the flag "visualize" is true, let's plot the situation
 	if visualize :
-		
 		figure = plt.figure()
 		ax = figure.add_subplot(111, aspect='equal')
 		
 		# matplotlib needs a list of "patches", polygons that it is going to render
-		for l in lamps :
-			ax.add_patch( Circle( (l[0],l[1]), radius=0.01, color='b', alpha=0.4) )
+		for l in lstLamps :
+			ax.add_patch( Circle( (l.x,l.y), radius=0.01, color='b', alpha=0.4) )
 		ax.add_patch( Rectangle( (0,0), square[0], square[1], color='w', alpha=0.4 ) )
 		
         # Affichage des points de discrétisation avec une couleur interpolée
@@ -80,6 +80,7 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 		plt.close(figure)
 	
 	return globalFitness
+
 
 def mutation1(lamp) :
 	"""
@@ -133,14 +134,17 @@ def main() :
 	# sides of the square, [width, height]
 	square = [1, 1]
 	
-	# radius of the lamps
-	radius = 0.3
 	
-	# coordinates of the lamps [ [x1,y1], [x2,y2], [x3,y4], ... ]
-	lamps = [ [0.3,0.3], [0.3,0.7], [0.7,0.3], [0.7,0.7] ]
+	# Création de 4 lampes dans le carré (0,1)
+	lamps = [
+    Ind(x=0.2, y=0.2, puissance=1.0, theta1=0.0, theta2=360.0),  # Lampe en bas à gauche
+    Ind(x=0.8, y=0.2, puissance=1.0, theta1=0.0, theta2=360.0),  # Lampe en bas à droite
+    Ind(x=0.2, y=0.8, puissance=1.0, theta1=0.0, theta2=360.0),  # Lampe en haut à gauche
+    Ind(x=0.8, y=0.8, puissance=1.0, theta1=0.0, theta2=360.0),  # Lampe en haut à droite
+	]
 	
 	# calling the function; the argument "visualize=True" makes it plot the current situation
-	fitness = evaluateLamps(lamps, radius, square, visualize=True)
+	fitness = evaluateLamps(lamps, square, visualize=True)
 	
 	return
 

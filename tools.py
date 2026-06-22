@@ -1,4 +1,4 @@
-import lamps.py
+from lamps import *
 import math
 
 
@@ -54,5 +54,5 @@ def calcule_eclairement(lstLampe, x, y):
 def somme_puissance(lstLampe):
     somme = 0.0
     for i in range(len(lstLampe)):
-        somme += lstLampe[i].puiss*lstLampe[i].puiss
+        somme += lstLampe[i].puissance*lstLampe[i].puissance
     return somme

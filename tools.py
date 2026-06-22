@@ -49,3 +49,10 @@ def calcule_eclairement(lstLampe, x, y):
         if(eclairement_total > 1):
             return 1
     return eclairement_total
+
+
+def somme_puissance(lstLampe):
+    somme = 0.0
+    for i in range(len(lstLampe)):
+        somme += lstLampe[i].puiss*lstLampe[i].puiss
+    return somme

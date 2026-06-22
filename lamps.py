@@ -1,6 +1,7 @@
 # Function to evaluate the "lamp" problem, where we try to place round-shaped lamps to cover a square space
 # by Thomas Chabin, Evelyne Lutton, Alberto Tonda, 2018 <alberto.tonda@gmail.com>
 
+import tools.py
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -30,41 +31,31 @@ pas_arret = 4 # difference entre 2 iterations pour valider la convergence
 square = [1, 1]
 
 
-def evaluateLamps(lamps, radius, square, visualize=False) :
-	
-	globalFitness = 0.0
-	individualFitness = [0] * len(lamps)
+def evaluateLamps(lstLamps, square, visualize=False) :
 	
 	# this is a very rough discretization of the space
 	discretization = 100 # TODO lower discretization here to speed up computation, increase for increased precision
 	discretizationStep = square[0] / discretization
 	totalArea = square[0] * discretization * square[1] * discretization
 	
+	# Stockage des coordonnées et des valeurs d'éclairement pour la visualisation
+	x_points = []
+	y_points = []
+	eclairements = []
+
 	# compute coverage of the square, going step by step
-	coverage = 0.0
-	overlap = 0.0
+	somme_taux_eclairement = 0.0
 	
 	for x in np.arange(0.0, square[0], discretizationStep) :
 		for y in np.arange(0.0, square[1], discretizationStep) :
-			coveredByLamps = 0
-			for l in range(0, len(lamps)) :
-				
-				lamp = lamps[l]
-
-				# if the distance between the point and the center of any lamp is less than
-				# the radius of the lamps, then the point is lightened up!
-				distance = math.sqrt( math.pow(lamp[0] - x, 2) + math.pow(lamp[1] - y, 2) )
-				if distance <= radius : 
-					coveredByLamps += 1
-					individualFitness[l] += 1
-			
-			# now, if the point is covered by at least one lamp, the global fitness increases 
-			if coveredByLamps > 0 : coverage += 1
-			# but if it is covered by two or more, there's a 'waste' of light here, an overlap
-			if coveredByLamps > 1 : overlap += 1
+			eclairement = calcule_eclairement(lstLamps, x, y)
+			somme_taux_eclairement += 100*eclairement/discretization
+			x_points.append(x)
+			y_points.append(y)
+			eclairements.append(eclairement)
 	
 	# the global fitness can be computed in different ways
-	globalFitness = coverage / totalArea # just as total coverage by all lamps
+	globalFitness = somme_taux_eclairement / somme_puissance(lstLamps) # just as total coverage by all lamps
 	#globalFitness = (coverage - overlap) / totalArea # or maybe you'd like to also minimize overlap!
 	
 	# if the flag "visualize" is true, let's plot the situation
@@ -75,10 +66,16 @@ def evaluateLamps(lamps, radius, square, visualize=False) :
 		
 		# matplotlib needs a list of "patches", polygons that it is going to render
 		for l in lamps :
-			ax.add_patch( Circle( (l[0],l[1]), radius=radius, color='b', alpha=0.4) )
+			ax.add_patch( Circle( (l[0],l[1]), radius=0.01, color='b', alpha=0.4) )
 		ax.add_patch( Rectangle( (0,0), square[0], square[1], color='w', alpha=0.4 ) )
 		
-		ax.set_title("Lamp coverage of the arena (fitness %.2f)" % globalFitness)
+        # Affichage des points de discrétisation avec une couleur interpolée
+		for x, y, e in zip(x_points, y_points, eclairements):
+            # Interpolation linéaire entre blanc (0) et bleu pur (1)
+			color = (1 - e, 1 - e, 1)  # RGB : (R, V, B)
+			ax.scatter(x, y, color=color, s=1)  # s=1 pour des points très petits
+
+		ax.set_title(f"Lamp coverage of the arena (fitness {globalFitness:.2f})")
 		plt.show()
 		plt.close(figure)
 	
@@ -121,6 +118,9 @@ def appliquerEvolution(lamps) :
 		delta = math.abs(tmp - fit)
 		fit = tmp
 	return
+
+
+
 
 
 

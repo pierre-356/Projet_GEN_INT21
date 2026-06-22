@@ -22,17 +22,7 @@ class Ind:
 	theta1: float
 	theta2: float
 
-# parametre de l'algo genetique
-mu = 0.3
-lbda = 0.7
-Pc = 0.3
-Pm = 1-Pc
-pas_arret = 4 # difference entre 2 iterations pour valider la convergence
 
-# parametre de l'aleatoire
-delta_xy = 0.2
-delta_puiss = 0.2
-delta_theta = 0.2
 
 # parametres de l'environnement
 # sides of the square, [width, height]

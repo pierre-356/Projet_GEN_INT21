@@ -8,6 +8,8 @@ import numpy as np
 import sys
 from random import Random
 import time
+from dataclasses import dataclass
+
 
 from matplotlib.patches import Circle, Rectangle
 
@@ -84,6 +86,7 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 		plt.close(figure)
 	
 	return globalFitness
+
 
 def mutation1(lamp) :
 	"""

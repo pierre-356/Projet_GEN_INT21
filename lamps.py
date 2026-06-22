@@ -2,6 +2,7 @@
 # by Thomas Chabin, Evelyne Lutton, Alberto Tonda, 2018 <alberto.tonda@gmail.com>
 
 from tools import *
+from gene import *
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -52,6 +53,8 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 
 	# compute coverage of the square, going step by step
 	somme_taux_eclairement = 0.0
+
+	print("mamacita")
 	
 	for x in np.arange(0.0, square[0], discretizationStep) :
 		for y in np.arange(0.0, square[1], discretizationStep) :
@@ -60,6 +63,8 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 			x_points.append(x)
 			y_points.append(y)
 			eclairements.append(eclairement)
+
+	print("ouga")
 	
 	# the global fitness can be computed in different ways
 	globalFitness = somme_taux_eclairement / somme_puissance(lstLamps) # just as total coverage by all lamps
@@ -86,7 +91,6 @@ def evaluateLamps(lstLamps, square, visualize=False) :
 		plt.close(figure)
 	
 	return globalFitness
-
 
 
 
